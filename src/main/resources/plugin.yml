@@ -1,0 +1,6 @@
+name: Mechanism
+main: dev.reactant.mechanism.Mechanism
+version: 0.1.6
+api-version: 1.15
+depend:
+  - Reactant
