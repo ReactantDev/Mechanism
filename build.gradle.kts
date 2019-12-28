@@ -28,6 +28,7 @@ tasks.withType<KotlinCompile> {
 }
 
 repositories {
+    jcenter()
     mavenCentral()
     maven { url = URI.create("https://hub.spigotmc.org/nexus/content/repositories/snapshots") }
     maven { url = URI.create("https://repo.dmulloy2.net/nexus/repository/public/") }
