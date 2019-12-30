@@ -40,12 +40,13 @@ class MachinePersistentService(
     }
 
     private fun startHandleQueries() {
-        queries.subscribeOn(Schedulers.io())
+        queries.subscribeOn(Schedulers.single())
                 .doOnComplete {
                     Mechanism.logger.info("All machine persistent data has been saved")
                     queriesCompleted.onComplete()
                 }
                 .flatMapCompletable { it }
+                .retry(5)
                 .doOnError { it.printStackTrace() }
                 .subscribe()
 
