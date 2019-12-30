@@ -30,6 +30,7 @@ class MachineService(
 
         if (!machine.chunk.isLoaded || isFixed) Mechanism.logger.warn("Chunk is not loaded")
         Bukkit.getPluginManager().callEvent(MachineLoadEvent(machine))
+        machine.afterLoaded()
         (if (isFixed) fixedMachines else chunkMachines.getOrPut(machine.chunk) { hashSetOf() }).add(machine)
     }
 
@@ -43,18 +44,21 @@ class MachineService(
 
         if (!machine.chunk.isLoaded) Mechanism.logger.warn("Chunk is not loaded")
         Bukkit.getPluginManager().callEvent(MachineCreateEvent(machine))
+        machine.afterCreated()
         loadMachine(machine, isFixed)
     }
 
     private fun unloadMachineResources(machine: Machine) {
+        machine.beforeUnload()
         Bukkit.getPluginManager().callEvent(MachineUnloadEvent(machine))
-        machine.onUnload()
+        machine.afterUnloaded()
         chunkMachines.get(machine.chunk)!!.remove(machine)
     }
 
     fun destroyMachine(machine: Machine) {
         unloadMachineResources(machine)
         Bukkit.getPluginManager().callEvent(MachineDestroyEvent(machine))
+        machine.afterDestroyed()
         unloadMachineResources(machine)
     }
 

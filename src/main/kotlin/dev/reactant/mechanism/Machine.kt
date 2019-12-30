@@ -33,8 +33,14 @@ abstract class Machine(val uuid: UUID, val chunk: Chunk) {
 
     /**
      * Will be called when unload
+     * All of the states should be complete in this stage
      */
-    fun onUnload() = this.states.forEach { it.onComplete() }
+    fun beforeUnload() = this.states.forEach { it.onComplete() }
+
+    fun afterLoaded() = Unit
+    fun afterCreated() = Unit
+    fun afterDestroyed() = Unit
+    fun afterUnloaded() = Unit
 }
 
 interface MachinePersistentData {
