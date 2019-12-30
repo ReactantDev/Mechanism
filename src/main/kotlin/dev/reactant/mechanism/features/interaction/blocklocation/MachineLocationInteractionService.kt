@@ -18,11 +18,11 @@ class MachineLocationInteractionService(val machineService: MachineService, val 
     private val machineInteractiveLocationMap = HashMap<MachineLocationBasedInteractive, HashSet<InteractiveLocation>>()
     override fun onEnable() {
         machineService.machines.mapNotNull { it as? MachineLocationBasedInteractive }
-                .forEach { monitorMachineLocations(it) }
+                .forEach { monitorMachineInteractiveLocations(it) }
 
         register(eventService) {
             MachineLoadEvent::class.observable().map { it.machine }.ofType(MachineLocationBasedInteractive::class.java)
-                    .subscribe { monitorMachineLocations(it) }
+                    .subscribe { monitorMachineInteractiveLocations(it) }
 
             PlayerInteractEvent::class.observable(EventPriority.LOW)
                     .filter {
@@ -33,13 +33,6 @@ class MachineLocationInteractionService(val machineService: MachineService, val 
                     .subscribe { (player, interactiveLocations) ->
                         interactiveLocations?.forEach { it.callback(player) }
                     }
-        }
-    }
-
-    private fun addMonitoringLocation(location: InteractiveLocation) {
-        location.interactionTypes.forEach { action ->
-            val key = location.location to action
-            monitoringLocation.getOrPut(key, { hashSetOf() }).add(location)
         }
     }
 
@@ -64,7 +57,15 @@ class MachineLocationInteractionService(val machineService: MachineService, val 
         }
     }
 
-    private fun monitorMachineLocations(machine: MachineLocationBasedInteractive) {
+    private fun addMonitoringLocation(location: InteractiveLocation) {
+        location.interactionTypes.forEach { action ->
+            val key = location.location to action
+            monitoringLocation.getOrPut(key, { hashSetOf() }).add(location)
+        }
+    }
+
+
+    private fun monitorMachineInteractiveLocations(machine: MachineLocationBasedInteractive) {
         machine.interactiveLocations
                 .doOnComplete { removeMachineMonitoring(machine) }
                 .subscribe {
