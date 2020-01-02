@@ -4,8 +4,8 @@ import com.comphenix.protocol.utility.MinecraftReflection
 import com.google.gson.GsonBuilder
 import dev.reactant.mechanism.serialize.ItemStackTypeAdapter
 import dev.reactant.mechanism.serialize.LocationTypeAdapter
-import io.reactivex.subjects.BehaviorSubject
-import io.reactivex.subjects.Subject
+import dev.reactant.mechanism.state.StateHolder
+import dev.reactant.mechanism.state.StateManager
 import org.bukkit.Bukkit
 import org.bukkit.Chunk
 import org.bukkit.Location
@@ -15,27 +15,22 @@ import java.util.*
 import kotlin.reflect.KClass
 import kotlin.reflect.full.findAnnotation
 
-abstract class Machine(val uuid: UUID, val chunk: Chunk) {
+abstract class Machine private constructor(
+        val uuid: UUID, val chunk: Chunk, val stateManager: StateManager
+) : StateHolder by stateManager {
+
+    constructor(uuid: UUID, chunk: Chunk) : this(uuid, chunk, StateManager())
     constructor(chunk: Chunk) : this(UUID.randomUUID(), chunk)
 
     val typeIdentifier = this::class.findAnnotation<MachineType>().let {
         it?.typeIdentifier ?: throw IllegalStateException(this::class.qualifiedName + " has no @MachineType")
     }
-    /**
-     * Should all state be complete when machine unload
-     */
-    private val states: HashSet<Subject<*>> = hashSetOf()
-
-    /**
-     * Automatically depose behavior subject
-     */
-    protected fun <T> defaultState(state: T): BehaviorSubject<T> = BehaviorSubject.createDefault(state).also { states.add(it) }
 
     /**
      * Will be called when unload
      * All of the states should be complete in this stage
      */
-    fun beforeUnload() = this.states.forEach { it.onComplete() }
+    fun beforeUnload() = completeAllStates()
 
     fun afterLoaded() = Unit
     fun afterCreated() = Unit
