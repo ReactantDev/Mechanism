@@ -6,6 +6,7 @@ import dev.reactant.mechanism.serialize.ItemStackTypeAdapter
 import dev.reactant.mechanism.serialize.LocationTypeAdapter
 import dev.reactant.mechanism.state.StateHolder
 import dev.reactant.mechanism.state.StateManager
+import io.reactivex.subjects.BehaviorSubject
 import org.bukkit.Bukkit
 import org.bukkit.Chunk
 import org.bukkit.Location
@@ -16,7 +17,7 @@ import kotlin.reflect.KClass
 import kotlin.reflect.full.findAnnotation
 
 abstract class Machine private constructor(
-        val uuid: UUID, val chunk: Chunk, val stateManager: StateManager
+        val uuid: UUID, val chunk: Chunk, protected val stateManager: StateManager
 ) : StateHolder by stateManager {
 
     constructor(uuid: UUID, chunk: Chunk) : this(uuid, chunk, StateManager())
@@ -25,6 +26,8 @@ abstract class Machine private constructor(
     val typeIdentifier = this::class.findAnnotation<MachineType>().let {
         it?.typeIdentifier ?: throw IllegalStateException(this::class.qualifiedName + " has no @MachineType")
     }
+
+    protected fun <T> defaultState(state: T): BehaviorSubject<T> = stateManager.defaultState(state)
 
     /**
      * Will be called when unload
