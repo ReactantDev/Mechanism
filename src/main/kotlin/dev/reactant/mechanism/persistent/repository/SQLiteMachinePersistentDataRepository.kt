@@ -6,9 +6,9 @@ import dev.reactant.mechanism.Mechanism
 import dev.reactant.mechanism.persistent.MachineAdaptersService
 import dev.reactant.reactant.core.component.Component
 import dev.reactant.reactant.core.component.lifecycle.LifeCycleHook
-import io.reactivex.Completable
-import io.reactivex.Maybe
-import io.reactivex.Single
+import io.reactivex.rxjava3.core.Completable
+import io.reactivex.rxjava3.core.Maybe
+import io.reactivex.rxjava3.core.Single
 import java.io.File
 import java.sql.*
 import java.util.*

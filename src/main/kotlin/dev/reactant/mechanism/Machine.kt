@@ -6,7 +6,7 @@ import dev.reactant.mechanism.serialize.ItemStackTypeAdapter
 import dev.reactant.mechanism.serialize.LocationTypeAdapter
 import dev.reactant.mechanism.state.StateHolder
 import dev.reactant.mechanism.state.StateManager
-import io.reactivex.subjects.BehaviorSubject
+import io.reactivex.rxjava3.subjects.BehaviorSubject
 import org.bukkit.Bukkit
 import org.bukkit.Chunk
 import org.bukkit.Location

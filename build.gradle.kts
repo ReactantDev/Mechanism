@@ -5,15 +5,15 @@ import java.net.URI
 
 val isSnapshot = true
 group = "dev.reactant"
-version = "0.1.6${if (isSnapshot) "-SNAPSHOT" else ""}"
+version = "0.2.0${if (isSnapshot) "-SNAPSHOT" else ""}"
 
-val kotlinVersion = "1.3.61"
+val kotlinVersion = "1.3.72"
 
 plugins {
     java
     `maven-publish`
     signing
-    kotlin("jvm") version "1.3.61"
+    kotlin("jvm") version "1.3.72"
     id("com.github.johnrengelman.shadow") version "5.0.0"
     id("org.jetbrains.dokka") version "0.10.0"
 }
@@ -38,13 +38,13 @@ repositories {
 dependencies {
     compileOnly(kotlin("stdlib-jdk8", kotlinVersion))
 
-    compileOnly("dev.reactant:reactant:0.1.6-SNAPSHOT")
+    compileOnly("dev.reactant:reactant:0.2.0-SNAPSHOT")
 
     compileOnly("org.xerial:sqlite-jdbc:3.30.1")
     compileOnly("com.comphenix.protocol:ProtocolLib:4.5.0")
     compileOnly("com.comphenix.packetwrapper:PacketWrapper:1.13-R0.1-SNAPSHOT")
 
-    compileOnly("org.spigotmc:spigot-api:1.15.1-R0.1-SNAPSHOT")
+    compileOnly("org.spigotmc:spigot-api:1.15.2-R0.1-SNAPSHOT")
 }
 
 val dokka = (tasks["dokka"] as DokkaTask).apply {

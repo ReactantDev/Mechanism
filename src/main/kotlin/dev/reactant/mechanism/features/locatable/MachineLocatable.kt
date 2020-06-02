@@ -1,6 +1,6 @@
 package dev.reactant.mechanism.features.locatable
 
-import io.reactivex.subjects.BehaviorSubject
+import io.reactivex.rxjava3.subjects.BehaviorSubject
 import org.bukkit.Location
 
 interface MachineLocatable {

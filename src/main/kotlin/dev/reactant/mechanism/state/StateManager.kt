@@ -1,7 +1,7 @@
 package dev.reactant.mechanism.state
 
-import io.reactivex.subjects.BehaviorSubject
-import io.reactivex.subjects.Subject
+import io.reactivex.rxjava3.subjects.BehaviorSubject
+import io.reactivex.rxjava3.subjects.Subject
 import java.util.*
 
 class StateManager : StateHolder {

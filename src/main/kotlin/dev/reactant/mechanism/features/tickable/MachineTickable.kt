@@ -1,6 +1,6 @@
 package dev.reactant.mechanism.features.tickable
 
-import io.reactivex.subjects.BehaviorSubject
+import io.reactivex.rxjava3.subjects.BehaviorSubject
 
 interface MachineTickable {
     val isTicking: BehaviorSubject<Boolean>

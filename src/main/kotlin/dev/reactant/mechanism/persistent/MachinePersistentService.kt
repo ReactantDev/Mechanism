@@ -10,10 +10,10 @@ import dev.reactant.reactant.core.component.Component
 import dev.reactant.reactant.core.component.lifecycle.LifeCycleHook
 import dev.reactant.reactant.service.spec.dsl.register
 import dev.reactant.reactant.service.spec.server.EventService
-import io.reactivex.Completable
-import io.reactivex.schedulers.Schedulers
-import io.reactivex.subjects.CompletableSubject
-import io.reactivex.subjects.PublishSubject
+import io.reactivex.rxjava3.core.Completable
+import io.reactivex.rxjava3.schedulers.Schedulers
+import io.reactivex.rxjava3.subjects.CompletableSubject
+import io.reactivex.rxjava3.subjects.PublishSubject
 import org.bukkit.Bukkit
 import org.bukkit.Chunk
 import org.bukkit.event.EventPriority
