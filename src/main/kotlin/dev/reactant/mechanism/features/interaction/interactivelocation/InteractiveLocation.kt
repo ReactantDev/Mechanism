@@ -1,4 +1,4 @@
-package dev.reactant.mechanism.features.interaction.blocklocation
+package dev.reactant.mechanism.features.interaction.interactivelocation
 
 import org.bukkit.Location
 import org.bukkit.entity.Player

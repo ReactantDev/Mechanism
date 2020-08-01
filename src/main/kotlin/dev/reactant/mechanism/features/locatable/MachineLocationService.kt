@@ -4,7 +4,6 @@ import dev.reactant.mechanism.MachineService
 import dev.reactant.mechanism.event.MachineLoadEvent
 import dev.reactant.reactant.core.component.Component
 import dev.reactant.reactant.core.component.lifecycle.LifeCycleHook
-import dev.reactant.reactant.service.spec.dsl.register
 import dev.reactant.reactant.service.spec.server.EventService
 import org.bukkit.Location
 
@@ -23,7 +22,7 @@ class MachineLocationService(
         machineService.machines.mapNotNull { it as? MachineLocatable }
                 .forEach { monitorMachineLocations(it) }
 
-        register(eventService) {
+        eventService {
             MachineLoadEvent::class.observable()
                     .map { it.machine }
                     .ofType(MachineLocatable::class.java)

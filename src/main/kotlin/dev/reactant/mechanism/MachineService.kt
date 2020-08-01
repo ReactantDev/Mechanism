@@ -6,7 +6,6 @@ import dev.reactant.mechanism.event.MachineLoadEvent
 import dev.reactant.mechanism.event.MachineUnloadEvent
 import dev.reactant.reactant.core.component.Component
 import dev.reactant.reactant.core.component.lifecycle.LifeCycleHook
-import dev.reactant.reactant.service.spec.dsl.register
 import dev.reactant.reactant.service.spec.server.EventService
 import org.bukkit.Bukkit
 import org.bukkit.Chunk
@@ -67,12 +66,12 @@ class MachineService(
     }
 
     private fun unloadChunkMachine(chunk: Chunk) {
-        chunkMachines[chunk]?.forEach { unloadMachine(it) }
+        chunkMachines[chunk]?.toSet()?.forEach { unloadMachine(it) }
         chunkMachines.remove(chunk)
     }
 
     override fun onEnable() {
-        register(eventService) {
+        eventService {
             ChunkUnloadEvent::class.observable().subscribe {
                 unloadChunkMachine(it.chunk)
             }

@@ -1,4 +1,4 @@
-package dev.reactant.mechanism.features.interaction.blocklocation
+package dev.reactant.mechanism.features.interaction.interactivelocation
 
 import io.reactivex.rxjava3.subjects.BehaviorSubject
 

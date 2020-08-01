@@ -1,26 +1,29 @@
-package dev.reactant.mechanism.features.interaction.blocklocation
+package dev.reactant.mechanism.features.interaction.interactivelocation
 
 import dev.reactant.mechanism.MachineService
 import dev.reactant.mechanism.event.MachineLoadEvent
 import dev.reactant.reactant.core.component.Component
 import dev.reactant.reactant.core.component.lifecycle.LifeCycleHook
-import dev.reactant.reactant.service.spec.dsl.register
 import dev.reactant.reactant.service.spec.server.EventService
 import org.bukkit.Location
 import org.bukkit.event.Event
 import org.bukkit.event.EventPriority
 import org.bukkit.event.block.Action
+import org.bukkit.event.block.BlockPistonExtendEvent
 import org.bukkit.event.player.PlayerInteractEvent
 
 @Component
-class MachineLocationInteractionService(val machineService: MachineService, val eventService: EventService) : LifeCycleHook {
+class MachineLocationInteractionService(
+        private val machineService: MachineService,
+        private val eventService: EventService
+) : LifeCycleHook {
     private val monitoringLocation = HashMap<Pair<Location, Action>, HashSet<InteractiveLocation>>()
     private val machineInteractiveLocationMap = HashMap<MachineLocationBasedInteractive, HashSet<InteractiveLocation>>()
     override fun onEnable() {
         machineService.machines.mapNotNull { it as? MachineLocationBasedInteractive }
                 .forEach { monitorMachineInteractiveLocations(it) }
 
-        register(eventService) {
+        eventService {
             MachineLoadEvent::class.observable().map { it.machine }.ofType(MachineLocationBasedInteractive::class.java)
                     .subscribe { monitorMachineInteractiveLocations(it) }
 
@@ -29,10 +32,13 @@ class MachineLocationInteractionService(val machineService: MachineService, val 
                         it.useInteractedBlock() != Event.Result.DENY && it.useItemInHand() != Event.Result.DENY
                                 && monitoringLocation.contains(it.clickedBlock?.location to it.action)
                     }
+                    .doOnNext { it.isCancelled = true }
                     .map { it.player to monitoringLocation[it.clickedBlock?.location to it.action] }
                     .subscribe { (player, interactiveLocations) ->
                         interactiveLocations?.forEach { it.callback(player) }
                     }
+
+            BlockPistonExtendEvent::class.observable(EventPriority.HIGH).subscribe { it.isCancelled = true }
         }
     }
 
@@ -63,7 +69,6 @@ class MachineLocationInteractionService(val machineService: MachineService, val 
             monitoringLocation.getOrPut(key, { hashSetOf() }).add(location)
         }
     }
-
 
     private fun monitorMachineInteractiveLocations(machine: MachineLocationBasedInteractive) {
         machine.interactiveLocations

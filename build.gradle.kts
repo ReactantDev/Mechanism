@@ -75,7 +75,7 @@ val sourcesJar by tasks.registering(Jar::class) {
 }
 
 val shadowJar = (tasks["shadowJar"] as ShadowJar).apply {
-    //relocate("org.from.package", "org.target.package")
+    relocate("org.from.package", "org.target.package")
 }
 
 val deployPlugin by tasks.registering(Copy::class) {

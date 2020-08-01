@@ -1,17 +1,11 @@
 package dev.reactant.mechanism
 
-import com.comphenix.protocol.utility.MinecraftReflection
-import com.google.gson.GsonBuilder
-import dev.reactant.mechanism.serialize.ItemStackTypeAdapter
-import dev.reactant.mechanism.serialize.LocationTypeAdapter
 import dev.reactant.mechanism.state.StateHolder
 import dev.reactant.mechanism.state.StateManager
 import io.reactivex.rxjava3.subjects.BehaviorSubject
 import org.bukkit.Bukkit
 import org.bukkit.Chunk
-import org.bukkit.Location
 import org.bukkit.World
-import org.bukkit.inventory.ItemStack
 import java.util.*
 import kotlin.reflect.KClass
 import kotlin.reflect.full.findAnnotation
@@ -29,20 +23,20 @@ abstract class Machine private constructor(
 
     protected fun <T> defaultState(state: T): BehaviorSubject<T> = stateManager.defaultState(state)
 
-    /**
-     * Will be called when unload
-     * All of the states should be complete in this stage
-     */
-    fun beforeUnload() = completeAllStates()
+    fun beforeUnload() = Unit
 
     fun afterLoaded() = Unit
     fun afterCreated() = Unit
     fun afterDestroyed() = Unit
-    fun afterUnloaded() = Unit
+    fun afterUnloaded() = completeAllStates()
 }
 
 interface MachinePersistentData {
     val uuid: UUID
+
+    /**
+     * Used as index, the machine will be load when the chunk loaded
+     */
     val chunk: ChunkInfo
 
     val machineClass
@@ -52,20 +46,6 @@ interface MachinePersistentData {
     val machineTypeIdentifier
         get() = machineClass.findAnnotation<MachineType>()?.typeIdentifier
                 ?: throw IllegalStateException(machineClass.qualifiedName + " has no @MachineType")
-
-    fun toJson() = GSON_SERIALIZER.toJson(this, this::class.java)
-
-    companion object {
-        val GSON_SERIALIZER = GsonBuilder()
-                .serializeNulls()
-                .registerTypeAdapter(ItemStack::class.java, ItemStackTypeAdapter())
-                .registerTypeAdapter(MinecraftReflection.getCraftItemStackClass(), ItemStackTypeAdapter())
-                .registerTypeAdapter(Location::class.java, LocationTypeAdapter())
-                .create()
-
-        fun fromJson(json: String, dataClass: KClass<out MachinePersistentData>) =
-                GSON_SERIALIZER.fromJson(json, dataClass.java)
-    }
 
 }
 

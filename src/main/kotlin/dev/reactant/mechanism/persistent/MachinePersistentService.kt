@@ -5,11 +5,10 @@ import dev.reactant.mechanism.MachineService
 import dev.reactant.mechanism.Mechanism
 import dev.reactant.mechanism.event.MachineUnloadEvent
 import dev.reactant.mechanism.persistent.repository.MachinePersistentDataRepository
-import dev.reactant.reactant.core.ReactantCore
 import dev.reactant.reactant.core.component.Component
 import dev.reactant.reactant.core.component.lifecycle.LifeCycleHook
-import dev.reactant.reactant.service.spec.dsl.register
 import dev.reactant.reactant.service.spec.server.EventService
+import dev.reactant.reactant.service.spec.server.SchedulerService
 import io.reactivex.rxjava3.core.Completable
 import io.reactivex.rxjava3.schedulers.Schedulers
 import io.reactivex.rxjava3.subjects.CompletableSubject
@@ -22,16 +21,23 @@ import org.bukkit.event.world.ChunkLoadEvent
 @Component
 class MachinePersistentService(
         private val eventService: EventService,
+        private val schedulerService: SchedulerService,
         private val machineService: MachineService,
         private val machinePersistentDataRepository: MachinePersistentDataRepository,
         private val machineAdaptersService: MachineAdaptersService
 ) : LifeCycleHook {
-    private val queries = PublishSubject.create<Completable>()
-    private val queriesCompleted = CompletableSubject.create()
+    private lateinit var queries: PublishSubject<Completable>
+    private lateinit var queriesCompleted: CompletableSubject
+
+    private fun createQueriesSubject() {
+        queries = PublishSubject.create<Completable>()
+        queriesCompleted = CompletableSubject.create()
+    }
+
     override fun onEnable() {
         startHandleQueries()
 
-        register(eventService) {
+        eventService {
             MachineUnloadEvent::class.observable(EventPriority.LOWEST).subscribe { storeMachineState(it.machine) }
             ChunkLoadEvent::class.observable().subscribe { loadChunkMachines(it.chunk) }
         }
@@ -40,6 +46,7 @@ class MachinePersistentService(
     }
 
     private fun startHandleQueries() {
+        createQueriesSubject()
         queries.subscribeOn(Schedulers.single())
                 .doOnComplete {
                     Mechanism.logger.info("All machine persistent data has been saved")
@@ -52,11 +59,17 @@ class MachinePersistentService(
 
     }
 
-    override fun onDisable() {
-        machineService.chunkMachines.flatMap { it.value }.union(machineService.fixedMachines).forEach { machineService.unloadMachine(it) }
+    override fun onSave() {
+        machineService.chunkMachines.flatMap { it.value }.union(machineService.fixedMachines)
+                .forEach { machineService.unloadMachine(it) }
         queries.onComplete()
         queriesCompleted.blockingAwait()
+
+        // start a new queries subject
+        startHandleQueries()
     }
+
+    override fun onDisable() {}
 
     fun storeMachineState(machine: Machine) {
         val completable: Completable = machinePersistentDataRepository
@@ -71,7 +84,7 @@ class MachinePersistentService(
         val task: Completable = machinePersistentDataRepository
                 .getAll(chunk)
                 .map { machinesData -> machinesData.map { machineAdaptersService.getAdapter(it)!!.restore(it) } }
-                .observeOn(ReactantCore.mainThreadScheduler)
+                .observeOn(schedulerService.mainThreadScheduler)
                 .doOnSuccess { machines -> machines.forEach { machineService.loadMachine(it) } }
                 .ignoreElement()
         queries.onNext(task)
